@@ -725,13 +725,17 @@ public final class Table extends Observable {
                             }
                         } else {
                             destinationTile = chessBoard.getTile(tileId);
-                            final Move move = MoveFactory.createMove(chessBoard, sourceTile.getTileCoordinate(),
-                                    destinationTile.getTileCoordinate());
-                            final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
-                            if (transition.getMoveStatus().isDone()) {
-                                chessBoard = chessBoard.currentPlayer().makeMove(move).getTransitionBoard();
-                                moveLog.addMove(move);
-                                System.out.println(chessBoard);
+                            if (sourceTile != destinationTile) {
+                                final Move move = MoveFactory.createMove(chessBoard, sourceTile.getTileCoordinate(),
+                                        destinationTile.getTileCoordinate());
+                                if (move != Move.NULL_MOVE){
+                                    final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
+                                    if (transition.getMoveStatus().isDone()) {
+                                        chessBoard = chessBoard.currentPlayer().makeMove(move).getTransitionBoard();
+                                        moveLog.addMove(move);
+                                        System.out.println(chessBoard);
+                                    }
+                                }
                             }
                             sourceTile = null;
                             destinationTile = null;
