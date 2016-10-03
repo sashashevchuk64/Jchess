@@ -731,6 +731,7 @@ public final class Table extends Observable {
                             if (transition.getMoveStatus().isDone()) {
                                 chessBoard = chessBoard.currentPlayer().makeMove(move).getTransitionBoard();
                                 moveLog.addMove(move);
+                                System.out.println(chessBoard);
                             }
                             sourceTile = null;
                             destinationTile = null;
