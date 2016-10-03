@@ -15,7 +15,6 @@ import com.chess.engine.classic.board.MoveTransition;
 import com.chess.engine.classic.board.Tile;
 import com.chess.engine.classic.pieces.King;
 import com.chess.engine.classic.pieces.Pawn;
-import com.chess.engine.classic.player.ai.StandardBoardEvaluator;
 
 public class TestBoard {
 
@@ -36,7 +35,6 @@ public class TestBoard {
         assertFalse(board.currentPlayer().getOpponent().isCastled());
         assertTrue(board.currentPlayer().getOpponent().isKingSideCastleCapable());
         assertTrue(board.currentPlayer().getOpponent().isQueenSideCastleCapable());
-        assertEquals(new StandardBoardEvaluator().evaluate(board, 0), 0);
     }
 
     @Test
@@ -61,7 +59,6 @@ public class TestBoard {
         assertFalse(board.currentPlayer().getOpponent().isInCheckMate());
         assertEquals(board.currentPlayer(), board.whitePlayer());
         assertEquals(board.currentPlayer().getOpponent(), board.blackPlayer());
-        assertEquals(new StandardBoardEvaluator().evaluate(board, 0), 0);
 
         final MoveTransition moveTransition = board.currentPlayer()
                 .makeMove(MoveFactory.createMove(board, BoardUtils.getCoordinateAtPosition("e1"),

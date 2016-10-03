@@ -15,7 +15,6 @@ import com.chess.engine.classic.board.MoveTransition;
 import com.chess.engine.classic.pieces.Bishop;
 import com.chess.engine.classic.pieces.King;
 import com.chess.engine.classic.pieces.Rook;
-import com.chess.engine.classic.player.ai.StandardBoardEvaluator;
 
 public class TestPlayer {
 
@@ -36,7 +35,6 @@ public class TestPlayer {
                         BoardUtils.getCoordinateAtPosition("e5")));
 
         assertTrue(t2.getMoveStatus().isDone());
-        assertEquals(new StandardBoardEvaluator().evaluate(t2.getTransitionBoard(), 0), 0);
     }
 
     @Test

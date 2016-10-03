@@ -10,7 +10,6 @@ import com.chess.engine.classic.board.Move;
 import com.chess.engine.classic.board.MoveTransition;
 import com.chess.engine.classic.pieces.King;
 import com.chess.engine.classic.pieces.Piece;
-import com.chess.engine.classic.player.ai.MoveStrategy;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 
@@ -19,7 +18,6 @@ public abstract class Player {
     protected final Board board;
     protected final King playerKing;
     protected final Collection<Move> legalMoves;
-    private MoveStrategy strategy;
     private final boolean isInCheck;
 
     Player(final Board board,
@@ -60,10 +58,6 @@ public abstract class Player {
         return this.playerKing.isQueenSideCastleCapable();
     }
 
-    public MoveStrategy getMoveStrategy() {
-        return this.strategy;
-    }
-
     public King getPlayerKing() {
         return this.playerKing;
     }
@@ -95,10 +89,6 @@ public abstract class Player {
 
     public Collection<Move> getLegalMoves() {
         return this.legalMoves;
-    }
-
-    public void setMoveStrategy(final MoveStrategy strategy) {
-        this.strategy = strategy;
     }
 
     public static Collection<Move> calculateAttacksOnTile(final int tile,
