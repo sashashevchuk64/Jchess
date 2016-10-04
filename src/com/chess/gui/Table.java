@@ -13,17 +13,13 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
-import java.util.Observable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 
 import com.chess.com.chess.pgn.FenUtilities;
-import com.chess.com.chess.pgn.MySqlGamePersistence;
 import com.chess.engine.classic.board.Board;
 import com.chess.engine.classic.board.BoardUtils;
 import com.chess.engine.classic.board.Move;
@@ -50,7 +46,6 @@ public final class Table extends Observable {
     private BoardDirection boardDirection;
     private String pieceIconPath;
     private boolean highlightLegalMoves;
-    private boolean useBook;
     private Color lightTileColor = Color.decode("#FFFACD");
     private Color darkTileColor = Color.decode("#593E1A");
 
@@ -69,7 +64,6 @@ public final class Table extends Observable {
         this.chessBoard = Board.createStandardBoard();
         this.boardDirection = BoardDirection.NORMAL;
         this.highlightLegalMoves = false;
-        this.useBook = true;
         this.pieceIconPath = "art/holywarriors/";
         this.gameHistoryPanel = new GameHistoryPanel();
         this.debugPanel = new DebugPanel();
@@ -126,10 +120,6 @@ public final class Table extends Observable {
 
     private boolean getHighlightLegalMoves() {
         return this.highlightLegalMoves;
-    }
-
-    private boolean getUseBook() {
-        return this.useBook;
     }
 
     public void show() {
@@ -233,6 +223,16 @@ public final class Table extends Observable {
             }
         });
         optionsMenu.add(undoMoveMenuItem);
+
+        final JMenuItem setPositionMenuItem = new JMenuItem("setPositionMenuItem", KeyEvent.VK_A);
+        setPositionMenuItem.addActionListener(e -> {
+            final String fenString = "4k3/8/8/8/8/8/8/4K3 b 0 1";
+            undoAllMoves();
+            chessBoard = FenUtilities.createGameFromFEN(fenString);
+            Table.get().getBoardPanel().drawBoard(chessBoard);
+            }
+        );
+        optionsMenu.add(setPositionMenuItem);
 
         final JMenuItem setupGameMenuItem = new JMenuItem("Setup Game", KeyEvent.VK_S);
         setupGameMenuItem.addActionListener(e -> {
@@ -351,13 +351,6 @@ public final class Table extends Observable {
         cbLegalMoveHighlighter.addActionListener(e -> highlightLegalMoves = cbLegalMoveHighlighter.isSelected());
 
         preferencesMenu.add(cbLegalMoveHighlighter);
-
-        final JCheckBoxMenuItem cbUseBookMoves = new JCheckBoxMenuItem(
-                "Use Book Moves", true);
-
-        cbUseBookMoves.addActionListener(e -> useBook = cbUseBookMoves.isSelected());
-
-        preferencesMenu.add(cbUseBookMoves);
 
         return preferencesMenu;
 
@@ -536,44 +529,49 @@ public final class Table extends Observable {
             assignTilePieceIcon(chessBoard);
             highlightTileBorder(chessBoard);
             addMouseListener(new MouseListener() {
+
                 @Override
                 public void mouseClicked(final MouseEvent event) {
-                    if (isRightMouseButton(event)) {
-                        sourceTile = null;
-                        destinationTile = null;
-                        humanMovedPiece = null;
-                    } else if (isLeftMouseButton(event)) {
-                        if (sourceTile == null) {
-                            sourceTile = chessBoard.getTile(tileId);
-                            humanMovedPiece = sourceTile.getPiece();
-                            if (humanMovedPiece == null) {
-                                sourceTile = null;
-                            }
-                        } else {
-                            destinationTile = chessBoard.getTile(tileId);
-                            if (sourceTile != destinationTile) {
-                                final Move move = MoveFactory.createMove(chessBoard, sourceTile.getTileCoordinate(),
-                                        destinationTile.getTileCoordinate());
-                                if (move != Move.NULL_MOVE){
-                                    final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
-                                    if (transition.getMoveStatus().isDone()) {
-                                        chessBoard = chessBoard.currentPlayer().makeMove(move).getTransitionBoard();
-                                        moveLog.addMove(move);
-                                        System.out.println(chessBoard);
-                                    }
-                                }
-                            }
+                        if (isRightMouseButton(event)) {
                             sourceTile = null;
                             destinationTile = null;
                             humanMovedPiece = null;
+                        } else if (isLeftMouseButton(event)) {
+                            if (sourceTile == null) {
+                                sourceTile = chessBoard.getTile(tileId);
+                                humanMovedPiece = sourceTile.getPiece();
+                                if (humanMovedPiece == null) {
+                                    sourceTile = null;
+                                }
+                            } else {
+                                destinationTile = chessBoard.getTile(tileId);
+                                if (sourceTile != destinationTile) {
+                                    final Move move = MoveFactory.createMove(chessBoard, sourceTile.getTileCoordinate(),
+                                            destinationTile.getTileCoordinate());
+                                    if (move != Move.NULL_MOVE) {
+                                        final MoveTransition transition = chessBoard.currentPlayer().makeMove(move);
+                                        if (transition.getMoveStatus().isDone()) {
+                                            chessBoard = chessBoard.currentPlayer().makeMove(move).getTransitionBoard();
+                                            moveLog.addMove(move);
+                                            System.out.println(moveLog.getMoves().toString());
+                                            if (Objects.equals(moveLog.getMoves().toString(), "[Ke7, Ke2, Kf6, Kf3]")) {
+                                                System.out.println("YEE");
+                                            }
+                                            System.out.println(chessBoard);
+                                        }
+                                    }
+                                }
+                                sourceTile = null;
+                                destinationTile = null;
+                                humanMovedPiece = null;
+                            }
                         }
-                    }
-                    invokeLater(() -> {
-                        gameHistoryPanel.redo(chessBoard, moveLog);
-                        takenPiecesPanel.redo(moveLog);
-                        boardPanel.drawBoard(chessBoard);
-                        debugPanel.redo();
-                    });
+                        invokeLater(() -> {
+                            gameHistoryPanel.redo(chessBoard, moveLog);
+                            takenPiecesPanel.redo(moveLog);
+                            boardPanel.drawBoard(chessBoard);
+                            debugPanel.redo();
+                        });
                 }
 
                 @Override
